@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public float moveSpeed = 5f;
 
     [Header("Jump Settings")]
     public float jumpHeight = 2f;
@@ -20,8 +21,6 @@ public class PlayerController : MonoBehaviour
 
     private Animator animator;
 
-    public float moveSpeed = 5f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -29,28 +28,42 @@ public class PlayerController : MonoBehaviour
         animator.runtimeAnimatorController = idleController;
     }
 
-    // Update is called once per frame
     void Update()
     {
         Vector2 moveDirection = Vector2.zero;
+
         if (Input.GetKey(KeyCode.LeftArrow))
         {
             moveDirection.x -= 1f;
+            isMovingRight = false; // 왼쪽 이동
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
             moveDirection.x += 1f;
-            isMovingRight = true;
+            isMovingRight = true; // 오른쪽 이동
         }
 
-        if (moveDirection.x != 0f)
+        // 이동 방향이 바뀌면 스프라이트 뒤집기
+        if (moveDirection.x > 0f)
         {
-            animator.runtimeAnimatorController = runController;
+            spriteRenderer.flipX = false; // 오른쪽 바라봄
         }
-        else
+        else if (moveDirection.x < 0f)
         {
-            animator.runtimeAnimatorController = idleController;
+            spriteRenderer.flipX = true; // 왼쪽 바라봄
         }
+
+        if (!isJumping)
+        {
+            if (moveDirection.x != 0f)
+            {
+                animator.runtimeAnimatorController = runController;
+            }
+            else
+            {
+                animator.runtimeAnimatorController = idleController;
+            }
+        }   
 
         moveDirection = moveDirection.normalized;
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
@@ -59,12 +72,11 @@ public class PlayerController : MonoBehaviour
         {
             StartJump();
         }
+
         if (isJumping)
         {
             UpdateJump();
         }
-        isMovingRight = false;
-
     }
 
     void StartJump()
@@ -90,7 +102,9 @@ public class PlayerController : MonoBehaviour
         else
         {
             float height = Mathf.Sin(progress * Mathf.PI) * jumpHeight;
-            transform.position = new Vector3(transform.position.x, startPosition.y + height, transform.position.z);
+            transform.position = new Vector3(transform.position.x, startPosition.y + height, transform.position.z);            
         }
     }
 }
+
+
