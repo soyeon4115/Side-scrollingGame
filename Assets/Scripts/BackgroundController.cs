@@ -45,7 +45,7 @@ public class BackgroundController : MonoBehaviour
 
     void MoveBackground(Transform bg)
     {
-        bg.position += Vector3.left * scrollSpeed * Time.deltaTime;
+        bg.position += Vector3.left * GameManager.Instance.scrollSpeed * Time.deltaTime;
         // Vector.left = (-1, 0, 0) * 10f * Time.deltaTime(1프레임 당 걸리는 시간)
         // Vector.right = (1, 0, 0)
     }

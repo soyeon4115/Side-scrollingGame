@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public RuntimeAnimatorController idleController;
     public RuntimeAnimatorController jumpController;
     public RuntimeAnimatorController runController;
+    public RuntimeAnimatorController crouchController;
 
     private Animator animator;
 
@@ -25,13 +26,38 @@ public class PlayerController : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-        animator.runtimeAnimatorController = idleController;
+        animator.runtimeAnimatorController = runController;
     }
 
     void Update()
     {
         Vector2 moveDirection = Vector2.zero;
 
+        if (Input.GetKeyDown(KeyCode.Space) && !isJumping)
+        {
+            StartJump();
+        }
+
+        if (isJumping)
+        {
+            UpdateJump();
+        }
+
+        else
+        {
+            // 점프 중이 아닐 때만 애니메이션 상태 업데이트
+            if (Input.GetKey(KeyCode.DownArrow))  // 아래 방향키를 누르고 있으면 엎드리기
+            {
+                animator.runtimeAnimatorController = crouchController;
+            }
+            else  // 아무 방향키도 누르지 않으면 대기 상태
+            {
+                animator.runtimeAnimatorController = runController;
+            }
+        }
+
+
+        /*
         if (Input.GetKey(KeyCode.LeftArrow))
         {
             moveDirection.x -= 1f;
@@ -52,7 +78,8 @@ public class PlayerController : MonoBehaviour
         {
             spriteRenderer.flipX = true; // 왼쪽 바라봄
         }
-
+        */
+        /*
         if (!isJumping)
         {
             if (moveDirection.x != 0f)
@@ -64,19 +91,10 @@ public class PlayerController : MonoBehaviour
                 animator.runtimeAnimatorController = idleController;
             }
         }   
+        */
 
         moveDirection = moveDirection.normalized;
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime);
-
-        if (Input.GetKeyDown(KeyCode.Space) && !isJumping)
-        {
-            StartJump();
-        }
-
-        if (isJumping)
-        {
-            UpdateJump();
-        }
     }
 
     void StartJump()
@@ -84,7 +102,6 @@ public class PlayerController : MonoBehaviour
         isJumping = true;
         jumpTimer = 0f;
         startPosition = transform.position;
-
         animator.runtimeAnimatorController = jumpController;
     }
 
@@ -97,7 +114,7 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, startPosition.y, transform.position.z);
             isJumping = false;
-            animator.runtimeAnimatorController = idleController;
+            animator.runtimeAnimatorController = runController;
         }
         else
         {

@@ -37,7 +37,8 @@ public class GameManager : MonoBehaviour
     Vector2 itemSpawnYRange = new Vector2(-2f, 2f);
 
     [SerializeField]
-    float scrollSpeed = 10f;
+    public float scrollSpeed = 10f;
+    float distance = 0f;
 
     [SerializeField]
     Camera targetCamera;
@@ -47,6 +48,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     TextMeshProUGUI scoreText;
+
+    [SerializeField]
+    TextMeshProUGUI distanceText;
 
     [SerializeField]
     Image[] hpImages;
@@ -71,6 +75,14 @@ public class GameManager : MonoBehaviour
     int hp;
     bool isGameOver = false;
 
+    [Header("Speed Scale")]
+    [SerializeField]
+    float speedIncreaseRate = 0.5f;
+
+    [SerializeField]
+    float maxScrollSpeed = 30f;
+
+
     void Start()
     {
         UpdateHpUI();
@@ -82,6 +94,13 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (isGameOver) return;
+
+        scrollSpeed = Mathf.Min(scrollSpeed + speedIncreaseRate * Time.deltaTime, maxScrollSpeed);
+        Debug.Log($"Scroll Speed: {scrollSpeed}");
+
+        distance += scrollSpeed * Time.deltaTime;
+        if (distanceText != null)
+            distanceText.text = $"Distance: {(int)distance}m";
 
         spawnTimer += Time.deltaTime;
         if (spawnTimer < itemSpawnInterval)
