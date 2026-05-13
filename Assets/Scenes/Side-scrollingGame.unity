@@ -390,8 +390,8 @@ Transform:
   m_GameObject: {fileID: 571793493}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.79, y: -3.193, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 1}
+  m_LocalPosition: {x: -6.79, y: -3.03, z: 0}
+  m_LocalScale: {x: 6, y: 6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -512,7 +512,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
-  jumpHeight: 2
+  jumpHeight: 3
   jumpDuration: 0.5
   idleController: {fileID: 9100000, guid: e4cff99bdcba65045bd79a993cb7a7cd, type: 2}
   jumpController: {fileID: 9100000, guid: dedd163f69c75a943bd951a37812842d, type: 2}
@@ -855,6 +855,11 @@ MonoBehaviour:
   maxHp: 3
   speedIncreaseRate: 0.5
   maxScrollSpeed: 30
+  platformPrefab: {fileID: 1670638354650382655, guid: faa13fd460f1a8647b124bca7c4cd3bb, type: 3}
+  platformSpawnChance: 0.1
+  bonusScoreAmount: 5
+  bonusItemCont: 3
+  bonusItemSpacing: 1.5
 --- !u!4 &810865113
 Transform:
   m_ObjectHideFlags: 0

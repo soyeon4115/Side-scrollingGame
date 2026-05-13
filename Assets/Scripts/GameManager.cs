@@ -1,7 +1,5 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
-using System.Xml.Serialization;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,7 +7,7 @@ public class GameManager : MonoBehaviour
 
     int score = 0;
     public int Score => score;
-
+    
     public void AddScore(int amount = 1)
     {
         if (isGameOver) return;
@@ -18,15 +16,28 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Score: {score}");
         scoreText.text = $"Score: {score}";
     }
+    
+
     void Awake()
     {
         Instance = this;
         hp = maxHp;
     }
 
+    void Start()
+    {
+        if (bgmClip != null)
+        {
+            bgmSource = gameObject.AddComponent<AudioSource>();
+            bgmSource.clip = bgmClip;
+            bgmSource.loop = true;
+            bgmSource.Play();
+        }
+    }
+
     [SerializeField]
     GameObject itemPrefab;
-
+    
     [SerializeField]
     GameObject obstaclePrefab;
 
@@ -38,7 +49,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     public float scrollSpeed = 10f;
-    float distance = 0f;
 
     [SerializeField]
     Camera targetCamera;
@@ -53,27 +63,7 @@ public class GameManager : MonoBehaviour
     TextMeshProUGUI distanceText;
 
     [SerializeField]
-    Image[] hpImages;
-
-    [SerializeField]
-    Sprite fullHpSprite;
-
-    [SerializeField]
-    Sprite emptyHpSprite;
-
-    [SerializeField]
-    GameObject gameOverPanel;
-
-    [SerializeField]
     int itemsPerObstacle = 10;
-
-    float spawnTimer;
-    int itemSpawnCount;
-
-    [SerializeField]
-    int maxHp = 3;
-    int hp;
-    bool isGameOver = false;
 
     [Header("Speed Scale")]
     [SerializeField]
@@ -82,14 +72,32 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     float maxScrollSpeed = 30f;
 
+    [Header("BGM")]
+    [SerializeField]
+    AudioClip bgmClip;
 
-    void Start()
-    {
-        UpdateHpUI();
+    AudioSource bgmSource;
 
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(false);
-    }
+    float spawnTimer;
+    int itemSpawnCount;
+    float distance;
+
+    [SerializeField]
+    int maxHp = 3;
+    int hp;
+    bool isGameOver = false;
+
+    [SerializeField]
+    PlayerController playerController;
+
+    [Header("Platform Settings")]
+    public GameObject platformPrefab;
+    [SerializeField] float platformSpawnChance = 0.1f;
+    [SerializeField] int bonusScoreAmount = 5;
+    [SerializeField] int bonusItemCount = 3;
+    [SerializeField] float bonusItemSpacing = 1.5f;
+    
+    private Platform currentPlatform = null;
 
     void Update()
     {
@@ -109,10 +117,22 @@ public class GameManager : MonoBehaviour
         spawnTimer = 0f;
 
         itemSpawnCount++;
-        if (itemSpawnCount >= itemsPerObstacle)
+
+        if (currentPlatform == null)
         {
-            itemSpawnCount = 0;
-            SpawnObstacle();
+            if (Random.value < platformSpawnChance)
+            {
+                SpawnPlatform();
+            }
+            else if (itemSpawnCount >= itemsPerObstacle)
+            {
+                itemSpawnCount = 0;
+                SpawnObstacle();
+            }
+            else
+            {
+                SpawnItem();
+            }
         }
         else
         {
@@ -127,8 +147,6 @@ public class GameManager : MonoBehaviour
         hp--;
         Debug.Log($"HP: {hp}");
 
-        UpdateHpUI();
-
         if (hp <= 0)
             GameOver();
     }
@@ -137,14 +155,6 @@ public class GameManager : MonoBehaviour
     {
         isGameOver = true;
         Debug.Log("Game Over");
-
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(true);
-            TextMeshProUGUI finalScoreText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>();
-            if (finalScoreText != null)
-                finalScoreText.text = $"Final Score: {score}";
-        }
     }
 
     void SpawnItem()
@@ -159,14 +169,16 @@ public class GameManager : MonoBehaviour
         if (mover == null)
             mover = item.AddComponent<ItemMover>();
 
-        mover.scrollSpeed = scrollSpeed;
         mover.targetCamera = targetCamera != null ? targetCamera : Camera.main;
     }
 
     void SpawnObstacle()
     {
         float spawnX = GetCameraRightX();
-        float spawnY = Random.Range(itemSpawnYRange.x, itemSpawnYRange.y);
+        
+        float[] possibleY = new float[] { -3.0f, -1.3f, -0.5f };
+        float spawnY = possibleY[Random.Range(0, possibleY.Length)];
+   
         Vector3 spawnPosition = new Vector3(spawnX, spawnY, 0f);
 
         GameObject obstacle = Instantiate(obstaclePrefab, spawnPosition, Quaternion.identity, itemParent);
@@ -175,9 +187,44 @@ public class GameManager : MonoBehaviour
         if (mover == null)
             mover = obstacle.AddComponent<ItemMover>();
 
-        mover.scrollSpeed = scrollSpeed;
         mover.targetCamera = targetCamera != null ? targetCamera : Camera.main;
         mover.isObstacle = true;
+    }
+
+    void SpawnPlatform()
+    {
+        if (platformPrefab == null) return;
+
+        float spawnX = GetCameraRightX();
+        Vector3 spawnPosition = new Vector3(spawnX, -1.3f, 0f);
+
+        GameObject platform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity, itemParent);
+
+        Platform platformScript = platform.GetComponent<Platform>();
+        if (platformScript != null)
+            platformScript.targetCamera = targetCamera != null ? targetCamera : Camera.main;
+
+        currentPlatform = platformScript;
+
+        for (int i = 0; i < bonusItemCount; i++)
+        {
+            Vector3 itemPos = spawnPosition + new Vector3(i * bonusItemSpacing, -0.8f, 0f);
+            GameObject item = Instantiate(itemPrefab, itemPos, Quaternion.identity, itemParent);
+
+            ItemMover mover = item.GetComponent<ItemMover>();
+            if (mover != null)
+                mover.enabled = false;
+
+            mover.bonusScore = bonusScoreAmount;
+
+            if (platformScript != null)
+                platformScript.AddBonusItem(item);
+        }
+    }
+
+    public void OnPlatformDestroyed()
+    {
+        currentPlatform = null;
     }
 
     float GetCameraRightX()
@@ -188,17 +235,5 @@ public class GameManager : MonoBehaviour
 
         float distance = Mathf.Abs(cam.transform.position.z);
         return cam.ViewportToWorldPoint(new Vector3(1f, 0.5f, distance)).x;
-    }
-    
-
-    void UpdateHpUI()
-    {
-        for (int i = 0; i < hpImages.Length; i++)
-        {
-            if (hpImages[i] != null)
-            {
-                hpImages[i].sprite = i < hp ? fullHpSprite : emptyHpSprite;
-            }
-        }
     }
 }
