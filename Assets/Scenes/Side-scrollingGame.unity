@@ -835,6 +835,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e46cabaf1142dbc4bae87061a6167726, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  hpHearts:
+  - {fileID: 584082929}
+  - {fileID: 755759507}
+  - {fileID: 1171756825}
+  fullHeart: {fileID: 134086666222474253, guid: 1f021d39f1bc0b94ab1d61bf20009de1, type: 3}
+  emptyHeart: {fileID: -902086654454736923, guid: 1f021d39f1bc0b94ab1d61bf20009de1, type: 3}
+  gameOverPanel: {fileID: 1272039909}
   itemPrefab: {fileID: 1272028461796138931, guid: deedcb9b73727404885bf87e90a832c2, type: 3}
   obstaclePrefab: {fileID: 3544921589517426966, guid: 5afce607a8db46141a5707ee7e9c8b0b, type: 3}
   itemSpawnInterval: 0.5
@@ -844,21 +851,16 @@ MonoBehaviour:
   itemParent: {fileID: 1993719070}
   scoreText: {fileID: 926648472}
   distanceText: {fileID: 871777887}
-  hpImages:
-  - {fileID: 584082929}
-  - {fileID: 755759507}
-  - {fileID: 1171756825}
-  fullHpSprite: {fileID: 134086666222474253, guid: 1f021d39f1bc0b94ab1d61bf20009de1, type: 3}
-  emptyHpSprite: {fileID: -902086654454736923, guid: 1f021d39f1bc0b94ab1d61bf20009de1, type: 3}
-  gameOverPanel: {fileID: 1272039909}
   itemsPerObstacle: 10
-  maxHp: 3
   speedIncreaseRate: 0.5
   maxScrollSpeed: 30
+  bgmClip: {fileID: 0}
+  maxHp: 3
+  playerController: {fileID: 0}
   platformPrefab: {fileID: 1670638354650382655, guid: faa13fd460f1a8647b124bca7c4cd3bb, type: 3}
   platformSpawnChance: 0.1
   bonusScoreAmount: 5
-  bonusItemCont: 3
+  bonusItemCount: 3
   bonusItemSpacing: 1.5
 --- !u!4 &810865113
 Transform:
@@ -2206,7 +2208,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7cfcb1095c48724597540cab3903a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  scrollSpeed: 8
   background1: {fileID: 261861064}
   background2: {fileID: 522234275}
   targetCamera: {fileID: 608017578}

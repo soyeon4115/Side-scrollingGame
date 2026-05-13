@@ -1,9 +1,18 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+
+    [Header("HP UI Settings")]
+    [SerializeField] Image[] hpHearts;   // 인스펙터에서 하트 이미지 3개를 연결하세요.
+    [SerializeField] Sprite fullHeart;   // HP_1 스프라이트 등록
+    [SerializeField] Sprite emptyHeart;  // HP_0 스프라이트 등록
+
+    [Header("GameOver UI")]
+    [SerializeField] private GameObject gameOverPanel; // 게임오버 시 나타날 패널(Panel)
 
     int score = 0;
     public int Score => score;
@@ -22,6 +31,9 @@ public class GameManager : MonoBehaviour
     {
         Instance = this;
         hp = maxHp;
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
     }
 
     void Start()
@@ -147,14 +159,33 @@ public class GameManager : MonoBehaviour
         hp--;
         Debug.Log($"HP: {hp}");
 
+        UpdateHeartUI();
+
         if (hp <= 0)
             GameOver();
+    }
+
+    void UpdateHeartUI()
+    {
+        for (int i = 0; i < hpHearts.Length; i++)
+        {
+            // i(0,1,2)가 현재 남은 hp보다 작으면 꽉 찬 하트, 아니면 빈 하트
+            hpHearts[i].sprite = (i < hp) ? fullHeart : emptyHeart;
+        }
     }
 
     void GameOver()
     {
         isGameOver = true;
         Debug.Log("Game Over");
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
+
+        // 필요하다면 게임을 멈춥니다.
+        Time.timeScale = 0f;
     }
 
     void SpawnItem()
@@ -199,8 +230,8 @@ public class GameManager : MonoBehaviour
         Vector3 spawnPosition = new Vector3(spawnX, -1.3f, 0f);
 
         GameObject platform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity, itemParent);
-
         Platform platformScript = platform.GetComponent<Platform>();
+
         if (platformScript != null)
             platformScript.targetCamera = targetCamera != null ? targetCamera : Camera.main;
 
@@ -208,13 +239,15 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < bonusItemCount; i++)
         {
-            Vector3 itemPos = spawnPosition + new Vector3(i * bonusItemSpacing, -0.8f, 0f);
+            Vector3 itemPos = spawnPosition + new Vector3(i * bonusItemSpacing, -1.5f, 0f);
             GameObject item = Instantiate(itemPrefab, itemPos, Quaternion.identity, itemParent);
 
             ItemMover mover = item.GetComponent<ItemMover>();
-            if (mover != null)
-                mover.enabled = false;
 
+            Collider2D col = item.GetComponent<Collider2D>();
+            col.isTrigger = true;
+
+            mover.enabled = false;
             mover.bonusScore = bonusScoreAmount;
 
             if (platformScript != null)

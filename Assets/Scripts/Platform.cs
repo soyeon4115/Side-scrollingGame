@@ -18,8 +18,10 @@ public class Platform : MonoBehaviour
 
     void Update()
     {
-        Vector3 movement = Vector3.left * GameManager.Instance.scrollSpeed * Time.deltaTime;
-        transform.position += movement;
+        // Vector3 movement = Vector3.left * GameManager.Instance.scrollSpeed * Time.deltaTime;
+        // transform.position += movement;
+
+        transform.position += Vector3.left * GameManager.Instance.scrollSpeed * Time.deltaTime;
 
         // for (int i = bonusItems.Count - 1; i >= 0; i--)
         // {
@@ -35,6 +37,8 @@ public class Platform : MonoBehaviour
 
     public void AddBonusItem(GameObject item)
     {
+        // 아이템을 플랫폼의 자식으로 설정 -> 플랫폼이 이동할 때 아이템은 자동으로 따라옴.
+        item.transform.SetParent(this.transform);
         bonusItems.Add(item);
     }
 
@@ -68,5 +72,17 @@ public class Platform : MonoBehaviour
             return;
 
         Destroy(gameObject);
+        ClearBonusItems();
+    }
+
+    public void ClearBonusItems()
+    {
+        // 체리에 닿았을 때 호출될 함수
+        // 플랫폼 아래의 모든 아이템을 제거합니다.
+        foreach (GameObject item in bonusItems)
+        {
+            if (item != null) Destroy(item);
+        }
+        bonusItems.Clear();
     }
 }
